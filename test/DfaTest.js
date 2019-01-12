@@ -23,5 +23,15 @@ describe('Dfa', function() {
     it('should reject even number of zeros', function() {
         assert.isFalse(Dfa.getInstance(tuple).doesAccept('00'),"00 is invalid input");
         assert.isFalse(Dfa.getInstance(tuple).doesAccept('0000'),"0000 is invalid input");
-    })
+    });
+
+    it('should accept odd number of zeros with any number of ones', function() {
+        assert.isTrue(Dfa.getInstance(tuple).doesAccept('011'),"011 is valid");
+        assert.isTrue(Dfa.getInstance(tuple).doesAccept('01010'),"01010 is valid");
+    });
+
+    it('should reject even number of zeros with any number of ones', function() {
+        assert.isFalse(Dfa.getInstance(tuple).doesAccept('0110'),"0110 is invalid input");
+        assert.isFalse(Dfa.getInstance(tuple).doesAccept('010100'),"010100 is invalid input");
+    });
 });
