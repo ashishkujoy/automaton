@@ -12,7 +12,16 @@ describe('Dfa', function() {
     };
 
     it('should reject empty string', function () {
-        const dfa = Dfa.getInstance(tuple);
-        assert.isFalse(dfa.doesAccept(''),"Should not accept empty string");
+        assert.isFalse(Dfa.getInstance(tuple).doesAccept(''),"Should not accept empty string");
+    });
+
+    it('should accept odd number of zeros', function() {
+        assert.isTrue(Dfa.getInstance(tuple).doesAccept('0'),"0 is valid");
+        assert.isTrue(Dfa.getInstance(tuple).doesAccept('000'),"000 is valid");
+    });
+
+    it('should reject even number of zeros', function() {
+        assert.isFalse(Dfa.getInstance(tuple).doesAccept('00'),"00 is invalid input");
+        assert.isFalse(Dfa.getInstance(tuple).doesAccept('0000'),"0000 is invalid input");
     })
 });
