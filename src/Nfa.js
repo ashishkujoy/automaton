@@ -14,7 +14,7 @@ class Nfa {
 
     next(currentState, input) {
         let stateByInput = this.getOrElse(this.delta[currentState],input,[]);
-        let statesByEpsilon = stateByInput.flatMap((state) => this.getOrElse(this.delta[state],'e',[]));
+        let statesByEpsilon = stateByInput.flatMap((state) => this.coexistingGroupOf(state));
         return stateByInput.concat(statesByEpsilon);
     }
 
