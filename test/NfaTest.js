@@ -1,5 +1,4 @@
 const chai = require('chai');
-const Dfa = require('../src/Dfa.js');
 const assert = chai.assert;
 const Nfa = require('../src/Nfa.js');
 

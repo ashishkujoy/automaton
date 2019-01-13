@@ -7,39 +7,34 @@ class Nfa {
         this.delta = delta;
     }
 
-    getOrElse(keyVal,key,defaultVal) {
-        if(keyVal === undefined) return defaultVal;
-        return keyVal[key] || defaultVal;
-    }
-
     next(currentState, input) {
-        let stateByInput = this.getOrElse(this.delta[currentState],input,[]);
+        let stateByInput = getOrElse(this.delta[currentState],input,[]);
         let statesByEpsilon = stateByInput.flatMap((state) => this.coexistingGroupOfExcluding(state));
         return stateByInput.concat(statesByEpsilon);
     }
 
     coexistingGroupOfExcluding(state,exclude = '') {
-        let statesByEpsilon = this.getOrElse(this.delta[state],'e',[]).filter((stateByEpsilon) => stateByEpsilon !== exclude);
-        let self = this;
-        let connectedTo = statesByEpsilon.flatMap((stateByEpsilon) => self.coexistingGroupOfExcluding.call(self,stateByEpsilon,state));
+        let statesByEpsilon = getOrElse(this.delta[state],'e',[]).filter((stateByEpsilon) => stateByEpsilon !== exclude);
+        let connectedTo = statesByEpsilon.flatMap((stateByEpsilon) => this.coexistingGroupOfExcluding.call(this,stateByEpsilon,state));
         connectedTo.unshift(state);
         return connectedTo;
     }
 
     doesAccept(string) {
-        let self = this;
         let finalStates = string.replace(/'*'/g, '').split('').reduce((currentStates, input) => {
-            return currentStates.flatMap((currentState) => {
-                let next1 = self.next(currentState,input);
-                return next1;
-            })
+            return currentStates.flatMap((currentState) => this.next(currentState, input))
         }, this.coexistingGroupOfExcluding(this.currentState));
-        return finalStates.some((finalState) => self.finalStates.includes(finalState));
+        return finalStates.some((finalState) => this.finalStates.includes(finalState));
     }
 
     static getInstance(tuple) {
         return new Nfa(tuple.states, tuple['start-state'], tuple['final-states'], tuple.alphabets, tuple.delta);
     }
 }
+
+const getOrElse = function(keyVal,key,defaultVal) {
+    if(keyVal === undefined) return defaultVal;
+    return keyVal[key] || defaultVal;
+};
 
 module.exports = Nfa;
