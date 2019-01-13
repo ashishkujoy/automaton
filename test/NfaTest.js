@@ -42,7 +42,7 @@ describe('Nfa', function() {
 
         it('should give coexistingStates excluding given state', function() {
             let nfa = Nfa.getInstance(tuple);
-            let coexistingStates = nfa.coexistingStates('q1','q2');
+            let coexistingStates = nfa.coexistingStates('q1',['q2']);
             assert.sameMembers(coexistingStates,['q1','q5']);
         });
 
