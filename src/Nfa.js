@@ -14,14 +14,14 @@ class Nfa {
 
     next(currentState, input) {
         let stateByInput = this.getOrElse(this.delta[currentState],input,[]);
-        let statesByEpsilon = stateByInput.flatMap((state) => this.coexistingGroupOf(state));
+        let statesByEpsilon = stateByInput.flatMap((state) => this.coexistingGroupOfExcluding(state));
         return stateByInput.concat(statesByEpsilon);
     }
 
-    coexistingGroupOf(state) {
-        let statesByEpsilon = this.getOrElse(this.delta[state],'e',[]);
+    coexistingGroupOfExcluding(state,exclude = '') {
+        let statesByEpsilon = this.getOrElse(this.delta[state],'e',[]).filter((stateByEpsilon) => stateByEpsilon !== exclude);
         let self = this;
-        let connectedTo = statesByEpsilon.flatMap((state) => self.coexistingGroupOf.call(self,state));
+        let connectedTo = statesByEpsilon.flatMap((stateByEpsilon) => self.coexistingGroupOfExcluding.call(self,stateByEpsilon,state));
         connectedTo.unshift(state);
         return connectedTo;
     }
@@ -33,7 +33,7 @@ class Nfa {
                 let next1 = self.next(currentState,input);
                 return next1;
             })
-        }, this.coexistingGroupOf(this.currentState));
+        }, this.coexistingGroupOfExcluding(this.currentState));
         return finalStates.some((finalState) => self.finalStates.includes(finalState));
     }
 
