@@ -18,15 +18,18 @@ describe('Nfa', function() {
         'start-state': 'q1',
         'final-states': ['q3', 'q6']
     };
+    const nfa = Nfa.getInstance(tuple);
 
     it('should accept 0', function() {
-        let nfa = Nfa.getInstance(tuple);
         assert.isTrue(nfa.doesAccept('0'),'0 should be valid input');
     });
 
     it('should reject 10',function(){
-        let nfa = Nfa.getInstance(tuple);
         assert.isFalse(nfa.doesAccept('10'),'10 should be invalid input');
+    });
+
+    it('should reject input containing invalid alphabet',function () {
+        assert.isFalse(nfa.doesAccept('0a10'));
     });
 
     describe('coexistingStates', function() {

@@ -7,6 +7,10 @@ class Nfa {
         this.delta = delta;
     }
 
+    static getInstance(tuple) {
+        return new Nfa(tuple.states, tuple['start-state'], tuple['final-states'], tuple.alphabets, tuple.delta);
+    }
+
     next(currentState, input) {
         let stateByInput = getOrElse(this.delta[currentState],input,[]);
         let statesByEpsilon = stateByInput.flatMap((state) => this.coexistingStates(state));
@@ -21,14 +25,24 @@ class Nfa {
     }
 
     doesAccept(string) {
-        let finalStates = string.replace(/'*'/g, '').split('').reduce((currentStates, input) => {
+        let inputs = this.normalLiseInput(string);
+        if(this.hasInvalidInput(inputs)) return false;
+        let finalStates = inputs.reduce((currentStates, input) => {
             return currentStates.flatMap((currentState) => this.next(currentState, input))
         }, this.coexistingStates(this.currentState));
-        return finalStates.some((finalState) => this.finalStates.includes(finalState));
+        return this.hasStableState(finalStates);
     }
 
-    static getInstance(tuple) {
-        return new Nfa(tuple.states, tuple['start-state'], tuple['final-states'], tuple.alphabets, tuple.delta);
+    hasInvalidInput(inputs) {
+        return inputs.some((input) => !this.alphabets.includes(input));
+    }
+
+    normalLiseInput(input) {
+        return input.replace(/'*'/g, '').split('');
+    }
+
+    hasStableState(states) {
+        return states.some((finalState) => this.finalStates.includes(finalState));
     }
 }
 
