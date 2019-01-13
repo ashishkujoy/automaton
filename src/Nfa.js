@@ -9,13 +9,13 @@ class Nfa {
 
     next(currentState, input) {
         let stateByInput = getOrElse(this.delta[currentState],input,[]);
-        let statesByEpsilon = stateByInput.flatMap((state) => this.coexistingGroupOfExcluding(state));
+        let statesByEpsilon = stateByInput.flatMap((state) => this.coexistingStates(state));
         return stateByInput.concat(statesByEpsilon);
     }
 
-    coexistingGroupOfExcluding(state,exclude = '') {
+    coexistingStates(state, exclude = '') {
         let statesByEpsilon = getOrElse(this.delta[state],'e',[]).filter((stateByEpsilon) => stateByEpsilon !== exclude);
-        let connectedTo = statesByEpsilon.flatMap((stateByEpsilon) => this.coexistingGroupOfExcluding.call(this,stateByEpsilon,state));
+        let connectedTo = statesByEpsilon.flatMap((stateByEpsilon) => this.coexistingStates.call(this,stateByEpsilon,state));
         connectedTo.unshift(state);
         return connectedTo;
     }
@@ -23,7 +23,7 @@ class Nfa {
     doesAccept(string) {
         let finalStates = string.replace(/'*'/g, '').split('').reduce((currentStates, input) => {
             return currentStates.flatMap((currentState) => this.next(currentState, input))
-        }, this.coexistingGroupOfExcluding(this.currentState));
+        }, this.coexistingStates(this.currentState));
         return finalStates.some((finalState) => this.finalStates.includes(finalState));
     }
 
