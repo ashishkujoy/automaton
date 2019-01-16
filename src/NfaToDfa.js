@@ -20,14 +20,44 @@ const combination = function (elements) {
     });
 };
 
-const nfaToDfaFinalStates = function(nfaToDfaStates,nfaFinalStates) {
-  return nfaToDfaStates.filter(nfaToDfaState => nfaFinalStates.some(finalState => nfaToDfaState.includes(finalState)));
+const nfaToDfaFinalStates = function (nfaToDfaStates, nfaFinalStates) {
+    return nfaToDfaStates.filter(nfaToDfaState => nfaFinalStates.some(finalState => nfaToDfaState.includes(finalState)));
 };
 
 const nfaToDfaStates = function (states) {
-    return ['q0'].concat(states).concat(combination(states));
+    return states.concat(combination(states));
 };
 
+const nfaToDfaTuple = function (nfaTuple) {
+    let dfaTuple = {
+        alphabets: nfaTuple.alphabets,
+        'start-state': nfaTuple['start-state']
+    };
+    dfaTuple['states'] = nfaToDfaStates(nfaTuple.states);
+    dfaTuple['final-states'] = nfaToDfaFinalStates(dfaStates, nfaTuple.finalStates);
+    dfaTuple.delta = getDfaDelta(nfaTuple.delta);
+    return dfaTuple;
+};
+
+const removeDuplicates = function (array) {
+    let uniqueArray = [];
+    new Set(array).forEach(value => uniqueArray.push(value));
+    return uniqueArray.sort();
+};
+
+const getDfaDelta = function (nfa, dfaStates) {
+    return dfaStates.reduce((dfaDelta, dfaState) => {
+        nfa.alphabets.forEach(alphabet => {
+            let nextStates = dfaState.flatMap(state => {
+                return nfa.next(state, alphabet);
+            });
+            if (dfaDelta[dfaState] === undefined) dfaDelta[dfaState] = {};
+            if (nextStates.length !== 0) dfaDelta[dfaState][alphabet] = removeDuplicates(nextStates).toString().replace(/,/g, '');
+        });
+        return dfaDelta;
+    }, {});
+};
 
 exports.combineWithNElements = combineWithNElements;
 exports.nfaToDfaStates = nfaToDfaStates;
+exports.getDfaDelta = getDfaDelta;

@@ -1,5 +1,6 @@
 const assert = require('chai').assert;
-const {combineWithNElements, nfaToDfaStates} = require('../src/NfaToDfa');
+const Nfa = require('../src/Nfa.js');
+const {combineWithNElements, nfaToDfaStates, getDfaDelta} = require('../src/NfaToDfa');
 
 
 describe('NfaToDfa helper functions', function () {
@@ -24,19 +25,19 @@ describe('NfaToDfa helper functions', function () {
         let testCases = [
             {
                 input: [],
-                output: ['q0']
+                output: []
             },
             {
                 input: ['q1', 'q2'],
-                output: ['q0', 'q1', 'q2', ['q1', 'q2']]
+                output: ['q1', 'q2', ['q1', 'q2']]
             },
             {
                 input: ['q1', 'q2', 'q3'],
-                output: ['q0', 'q1', 'q2', 'q3', ['q1', 'q2'], ['q1', 'q3'], ['q1', 'q2', 'q3'], ['q2', 'q3']]
+                output: ['q1', 'q2', 'q3', ['q1', 'q2'], ['q1', 'q3'], ['q1', 'q2', 'q3'], ['q2', 'q3']]
             },
             {
                 input: ['q1', 'q2', 'q3', 'q4'],
-                output: ['q0', 'q1', 'q2', 'q3', 'q4',
+                output: ['q1', 'q2', 'q3', 'q4',
                     ['q1', 'q2'], ['q1', 'q3'], ['q1', 'q4'], ['q1', 'q2', 'q3'], ['q1', 'q3', 'q4'], ['q1', 'q2', 'q3', 'q4'],
                     ['q2', 'q3'], ['q2', 'q4'], ['q2', 'q3', 'q4'],
                     ['q3', 'q4']
@@ -50,5 +51,36 @@ describe('NfaToDfa helper functions', function () {
             });
         });
     });
+
+    describe('getDfaDelta', function () {
+        let dfaStates = [['q1'], ['q2'], ['q3'], ['q1', 'q2'], ['q1', 'q3'], ['q1', 'q2', 'q3'], ['q2', 'q3']];
+        const tuple = {
+            states: ['q1', 'q2', 'q3'],
+            alphabets: ['a', 'b'],
+            delta: {
+                q1: {e: ['q3'], 'b': ['q2']},
+                q2: {'a': ['q2', 'q3'], 'b': ['q3']},
+                q3: {'a': ['q1']}
+            },
+            'start-state': 'q1',
+            'final-states': ['q1']
+        };
+        const nfa = Nfa.getInstance(tuple);
+        const expectedDelta = {
+            'q1': {'b': 'q2'},
+            'q2': {'a': 'q2q3', 'b': 'q3'},
+            'q3': {'a': 'q1q3'},
+            'q1,q2': {'a': 'q2q3', 'b': 'q2q3'},
+            'q1,q3': {'a': 'q1q3', 'b': 'q2'},
+            'q2,q3': {'a': 'q1q2q3', 'b': 'q3'},
+            'q1,q2,q3': {'a': 'q1q2q3', 'b': 'q2q3'}
+        };
+
+        it('should', function () {
+            let dfaDelta = getDfaDelta(nfa, dfaStates);
+            assert.deepNestedInclude(dfaDelta, expectedDelta)
+            // assert.sameMembers(nfa.next('q3','a'),['q1','q3']);
+        })
+    })
 
 });
