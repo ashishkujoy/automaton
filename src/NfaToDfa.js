@@ -1,3 +1,6 @@
+const Dfa = require('./Dfa.js');
+const Nfa = require('./Nfa.js');
+
 const combineWithNElements = function (elementToCombine, n, elements) {
     let go = function (combinations, remainingElements, elementToCombine, size) {
         if (remainingElements.length < size) return combinations;
@@ -8,6 +11,10 @@ const combineWithNElements = function (elementToCombine, n, elements) {
     };
 
     return go([], elements, elementToCombine, n);
+};
+
+const toString = function (array) {
+    return array.toString().replace(/,/g, '');
 };
 
 const combination = function (elements) {
@@ -25,18 +32,14 @@ const nfaToDfaFinalStates = function (nfaToDfaStates, nfaFinalStates) {
 };
 
 const nfaToDfaStates = function (states) {
-    return states.concat(combination(states));
+    return states.concat((combination(states).map(toString)));
 };
 
-const nfaToDfaTuple = function (nfaTuple) {
-    let dfaTuple = {
-        alphabets: nfaTuple.alphabets,
-        'start-state': nfaTuple['start-state']
-    };
-    dfaTuple['states'] = nfaToDfaStates(nfaTuple.states);
-    dfaTuple['final-states'] = nfaToDfaFinalStates(dfaStates, nfaTuple.finalStates);
-    dfaTuple.delta = getDfaDelta(nfaTuple.delta);
-    return dfaTuple;
+const nfaToDfa = function (nfa) {
+    let dfaStates = nfaToDfaStates(nfa.states);
+    let dfaFinalStates = nfaToDfaFinalStates(nfa.states, nfa.finalStates);
+    let dfaDelta = getDfaDelta(nfa, dfaStates);
+    return new Dfa(dfaStates, nfa.currentState, dfaFinalStates, nfa.alphabets, dfaDelta);
 };
 
 const removeDuplicates = function (array) {
@@ -52,7 +55,7 @@ const getDfaDelta = function (nfa, dfaStates) {
                 return nfa.next(state, alphabet);
             });
             if (dfaDelta[dfaState] === undefined) dfaDelta[dfaState] = {};
-            if (nextStates.length !== 0) dfaDelta[dfaState][alphabet] = removeDuplicates(nextStates).toString().replace(/,/g, '');
+            if (nextStates.length !== 0) dfaDelta[dfaState][alphabet] = toString(removeDuplicates(nextStates));
         });
         return dfaDelta;
     }, {});
@@ -61,3 +64,5 @@ const getDfaDelta = function (nfa, dfaStates) {
 exports.combineWithNElements = combineWithNElements;
 exports.nfaToDfaStates = nfaToDfaStates;
 exports.getDfaDelta = getDfaDelta;
+exports.nfaToDfaFinalStates = nfaToDfaFinalStates;
+exports.nfaToDfa = nfaToDfa;

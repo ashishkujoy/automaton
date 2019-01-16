@@ -1,6 +1,6 @@
 const assert = require('chai').assert;
 const Nfa = require('../src/Nfa.js');
-const {combineWithNElements, nfaToDfaStates, getDfaDelta} = require('../src/NfaToDfa');
+const {combineWithNElements, nfaToDfaStates, getDfaDelta, nfaToDfaFinalStates} = require('../src/NfaToDfa');
 
 
 describe('NfaToDfa helper functions', function () {
@@ -29,26 +29,31 @@ describe('NfaToDfa helper functions', function () {
             },
             {
                 input: ['q1', 'q2'],
-                output: ['q1', 'q2', ['q1', 'q2']]
+                output: ['q1', 'q2', 'q1q2']
             },
             {
                 input: ['q1', 'q2', 'q3'],
-                output: ['q1', 'q2', 'q3', ['q1', 'q2'], ['q1', 'q3'], ['q1', 'q2', 'q3'], ['q2', 'q3']]
+                output: ['q1', 'q2', 'q3', 'q1q2', 'q1q3', 'q1q2q3', 'q2q3']
             },
             {
                 input: ['q1', 'q2', 'q3', 'q4'],
-                output: ['q1', 'q2', 'q3', 'q4',
-                    ['q1', 'q2'], ['q1', 'q3'], ['q1', 'q4'], ['q1', 'q2', 'q3'], ['q1', 'q3', 'q4'], ['q1', 'q2', 'q3', 'q4'],
-                    ['q2', 'q3'], ['q2', 'q4'], ['q2', 'q3', 'q4'],
-                    ['q3', 'q4']
-                ]
+                output: ['q1', 'q2', 'q3', 'q4', 'q1q2', 'q1q3', 'q1q4', 'q1q2q3', 'q1q3q4', 'q1q2q3q4', 'q2q3', 'q2q4', 'q2q3q4', 'q3q4']
             }
         ];
 
         testCases.forEach(function (testCase) {
             it(`should give combination of ${testCase.input}`, function () {
-                assert.sameDeepMembers(nfaToDfaStates(testCase.input), testCase.output);
+                assert.sameMembers(nfaToDfaStates(testCase.input), testCase.output);
             });
+        });
+    });
+
+    describe('nfaToDfaFinalStates', function () {
+        it('should give final states of dfa based on final states of nfa',function () {
+            let nfaToDfaStates = ['q1', 'q2', 'q3', 'q4', 'q1q2', 'q1q3', 'q1q4', 'q1q2q3', 'q1q3q4', 'q1q2q3q4', 'q2q3', 'q2q4', 'q2q3q4', 'q3q4'];
+            let nfaFinalStates = ['q1', 'q4'];
+            let expectedFinalStates = ['q1', 'q4', 'q1q2', 'q1q3', 'q1q4', 'q1q2q3', 'q1q3q4', 'q1q2q3q4', 'q2q4', 'q2q3q4', 'q3q4'];
+            assert.sameMembers(nfaToDfaFinalStates(nfaToDfaStates, nfaFinalStates), expectedFinalStates);
         });
     });
 
@@ -79,7 +84,6 @@ describe('NfaToDfa helper functions', function () {
         it('should', function () {
             let dfaDelta = getDfaDelta(nfa, dfaStates);
             assert.deepNestedInclude(dfaDelta, expectedDelta)
-            // assert.sameMembers(nfa.next('q3','a'),['q1','q3']);
         })
     })
 
